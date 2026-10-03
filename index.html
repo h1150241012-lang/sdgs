@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SDGs性別平權 - 第一關</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Noto Sans TC', 'Fredoka', sans-serif;
+            background-color: #e8f5e9;
+            overflow-x: hidden;
+            user-select: none;
+        }
+
+        /* 村莊草地背景風格 */
+        .village-bg {
+            background: linear-gradient(135deg, #a8e063 0%, #56ab2f 100%);
+            box-shadow: inset 0 0 100px rgba(0,0,0,0.15);
+            position: relative;
+        }
+
+        /* 浮動雲朵動畫 */
+        .cloud {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 50px;
+            animation: floatCloud linear infinite;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.05));
+            pointer-events: none;
+        }
+        .cloud::before, .cloud::after {
+            content: '';
+            position: absolute;
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 50%;
+        }
+        .cloud1 { width: 120px; height: 40px; top: 8%; animation-duration: 35s; }
+        .cloud1::before { width: 50px; height: 50px; top: -20px; left: 20px; }
+        .cloud1::after { width: 40px; height: 40px; top: -15px; right: 20px; }
+
+        .cloud2 { width: 160px; height: 50px; top: 18%; animation-duration: 48s; animation-delay: -15s; }
+        .cloud2::before { width: 65px; height: 65px; top: -25px; left: 25px; }
+        .cloud2::after { width: 50px; height: 50px; top: -18px; right: 25px; }
+
+        @keyframes floatCloud {
+            0% { left: -200px; }
+            100% { left: 105vw; }
+        }
+
+        /* 茅草屋懸浮與完成狀態 */
+        .hut-card {
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            cursor: pointer;
+        }
+        .hut-card:hover:not(.completed) {
+            transform: translateY(-12px) scale(1.08);
+            filter: drop-shadow(0 15px 15px rgba(0,0,0,0.2));
+        }
+        .hut-card.completed {
+            cursor: default;
+            opacity: 0.85;
+            filter: grayscale(0.2);
+        }
+
+        /* 彈窗動畫 */
+        @keyframes modalPop {
+            0% { transform: scale(0.8) translateY(20px); opacity: 0; }
+            100% { transform: scale(1) translateY(0); opacity: 1; }
+        }
+        .animate-pop {
+            animation: modalPop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        /* 木質看板風格 */
+        .wood-panel {
+            background: #8d5b4c;
+            background: linear-gradient(145deg, #a06752, #7a4d3f);
+            border: 4px solid #5c3a2e;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,255,255,0.2);
+        }
+
+        /* 道路 SVG 樣式 */
+        .path-line {
+            stroke: #d7ccc8;
+            stroke-width: 14;
+            stroke-dasharray: 12 8;
+            stroke-linecap: round;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between relative select-none">
+
+    <!-- 雲朵背景 -->
+    <div class="cloud cloud1"></div>
+    <div class="cloud cloud2"></div>
+
+    <!-- 頂部資訊欄 -->
+    <header class="w-full p-4 md:p-6 flex justify-between items-center z-20 relative">
+        <!-- 左上方：網頁標題 -->
+        <div class="wood-panel px-5 py-2.5 rounded-2xl flex items-center gap-3 text-white">
+            <div class="bg-pink-500 p-2 rounded-xl text-white shadow-inner">
+                <i class="fa-solid me-1 fa-venus-mars text-xl"></i>
+            </div>
+            <div>
+                <h1 class="text-xl md:text-2xl font-black tracking-wide text-amber-100">SDGs性別平權</h1>
+                <p class="text-xs text-amber-200/80 hidden sm:block">第一關：村莊知識探索</p>
+            </div>
+        </div>
+
+        <!-- 右上方：答對題數計分板 -->
+        <div class="wood-panel px-6 py-2.5 rounded-2xl text-white flex items-center gap-3">
+            <i class="fa-solid fa-trophy text-amber-300 text-2xl animate-bounce"></i>
+            <div class="text-right">
+                <span class="text-xs text-amber-200 block">答對題數</span>
+                <span class="text-xl md:text-2xl font-black text-white" id="score-text">0 / 10</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主要遊戲畫面：村莊地圖 -->
+    <main class="flex-1 max-w-6xl w-full mx-auto p-4 flex items-center justify-center relative z-10">
+        <div class="village-bg w-full h-[650px] md:h-[700px] rounded-3xl border-8 border-emerald-800/40 relative overflow-hidden shadow-2xl">
+            
+            <!-- 村莊裝飾物：樹木與小花 -->
+            <div class="absolute top-10 left-10 text-emerald-800/30 text-5xl"><i class="fa-solid fa-tree"></i></div>
+            <div class="absolute bottom-12 left-1/3 text-emerald-800/30 text-6xl"><i class="fa-solid fa-trees"></i></div>
+            <div class="absolute top-1/3 right-12 text-emerald-800/30 text-5xl"><i class="fa-solid fa-tree"></i></div>
+            <div class="absolute bottom-20 right-1/4 text-emerald-800/20 text-4xl"><i class="fa-solid fa-tree"></i></div>
+            
+            <!-- 地圖小路描邊 (SVG Line) -->
+            <svg class="absolute inset-0 w-full h-full pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M 120 120 Q 300 80, 500 160 T 850 180 Q 900 350, 700 420 T 300 480 Q 150 550, 450 600" fill="none" class="path-line" />
+            </svg>
+
+            <!-- 10 座茅草屋容器 (採用相對與絕對定位分佈在村莊中) -->
+            <div id="huts-container" class="w-full h-full relative">
+                <!-- 茅草屋由 JavaScript 動態渲染產生 -->
+            </div>
+
+        </div>
+    </main>
+
+    <!-- 答題彈窗 (Modal) -->
+    <div id="quiz-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-amber-50 rounded-3xl border-4 border-amber-800/80 shadow-2xl max-w-xl w-full p-6 md:p-8 animate-pop relative">
+            <!-- 標題欄 -->
+            <div class="flex justify-between items-center border-b-2 border-amber-200 pb-3 mb-4">
+                <div class="flex items-center gap-2">
+                    <span id="modal-hut-number" class="bg-amber-700 text-amber-100 font-bold px-3 py-1 rounded-full text-sm">屋舍 #1</span>
+                    <h3 class="text-lg font-bold text-amber-900">SDG 5 性別平權問答</h3>
+                </div>
+            </div>
+
+            <!-- 題目內容 -->
+            <div class="mb-6">
+                <h4 id="question-title" class="text-xl font-bold text-slate-800 mb-4 leading-relaxed">
+                    題目載入中...
+                </h4>
+                <!-- 選項列表 -->
+                <div id="options-container" class="space-y-3">
+                    <!-- 選項按鈕 -->
+                </div>
+            </div>
+
+            <!-- 回饋解析區塊 (預設隱藏) -->
+            <div id="feedback-box" class="hidden p-4 rounded-2xl mb-4 border text-sm leading-relaxed">
+                <div id="feedback-title" class="font-bold mb-1 text-base flex items-center gap-2"></div>
+                <div id="feedback-explanation" class="text-slate-700"></div>
+            </div>
+
+            <!-- 下一題 / 關閉按鈕 -->
+            <div class="flex justify-end">
+                <button id="next-btn" class="hidden px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg transition transform active:scale-95">
+                    完成關卡 <i class="fa-solid fa-arrow-right ml-1"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 結算彈窗 (Settlement Modal) -->
+    <div id="result-modal" class="fixed inset-0 bg-slate-900/75 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl border-4 border-amber-700 shadow-2xl max-w-md w-full p-8 text-center animate-pop relative overflow-hidden">
+            
+            <div id="result-icon-container" class="w-24 h-24 mx-auto mb-4 rounded-full flex items-center justify-center text-5xl">
+                <!-- 圖示動態生成 -->
+            </div>
+
+            <h3 id="result-title" class="text-2xl font-black mb-2 text-slate-800">結算標題</h3>
+            <p id="result-message" class="text-slate-600 mb-6 leading-relaxed">結算詳細內文...</p>
+
+            <div class="bg-amber-50 p-4 rounded-2xl mb-6 border border-amber-200">
+                <span class="text-sm text-amber-800 font-medium block">最終成績</span>
+                <span id="final-score" class="text-3xl font-black text-amber-900">0 / 10</span>
+            </div>
+
+            <div id="result-actions" class="flex justify-center gap-4">
+                <!-- 按鈕動態生成 -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 10 道 SDG 5 性別平權相關題目
+        const questions = [
+            {
+                id: 1,
+                question: "聯合國永續發展目標 (SDGs) 中，哪一個目標專注於「實現性別平等，並賦權全部婦女與女童」？",
+                options: ["SDG 3 健康與福祉", "SDG 5 性別平權", "SDG 8 良好工作與經濟成長", "SDG 10 減少不平等"],
+                answer: 1,
+                explanation: "SDG 5 專注於消除對女性的歧視與暴力，促進性別平等及賦權所有婦女與女童。"
+            },
+            {
+                id: 2,
+                question: "關於「同工同酬」原則，下列敘述何者正確？",
+                options: ["男性體力較好，理應獲得更高的基本工資", "從事相同價值工作的員工，不應因性別而有薪資差異", "女性因生育照顧假多，薪資較少是合理的", "高薪職位應優先留給家庭經濟支柱者"],
+                answer: 1,
+                explanation: "同工同酬是指無分性別，只要從事相同工作或具同等價值的勞動，就應獲得相同的薪酬待遇。"
+            },
+            {
+                id: 3,
+                question: "如何破除家庭內部的性別分工刻板印象？",
+                options: ["家務事全部交給女性決定與處理", "男性只負責在外賺錢，不需承擔家務", "家務與育兒是家庭成員共同的責任，應合理分擔", "男性處理家務是幫忙，女性則是義務"],
+                answer: 2,
+                explanation: "無酬無償的家務與照顧工作應由家庭成員共同承擔與分工，不應綁定特定性別。"
+            },
+            {
+                id: 4,
+                question: "在選擇職涯發展（如工程師、護理師、幼保員等）時，正確的態度是什麼？",
+                options: ["男從事科技，女從事照顧服務最合適", "根據個人的興趣、能力與志向自由選擇", "某些職業有性別限制是不可改變的", "優先選擇社會大眾認為符合自己性別的行業"],
+                answer: 1,
+                explanation: "職業選擇不應受性別刻板印象限制，每個人都有權根據個人特長與興趣發展職涯。"
+            },
+            {
+                id: 5,
+                question: "促進女性參與企業與政治決策過程有何重要性？",
+                options: ["促進觀點多元化，有助於更全面的決策制定", "只是為了滿足國際法規的法律形式", "降低企業運作效率", "無任何實際影響"],
+                answer: 0,
+                explanation: "提升女性參與決策機構的比例能帶來多元視角，促進更公平與包容的社會發展。"
+            },
+            {
+                id: 6,
+                question: "當在學校或 workplace 聽到針對特定性別的貶抑笑話時，最適當的做法是？",
+                options: ["跟著大家一起大笑", "保持沉默不關我的事", "友善指出該言論帶有性別偏見，表達尊重的重要性", "在網路上公開霸凌該言論者"],
+                answer: 2,
+                explanation: "勇於發聲並友善溝通，有助於營造無偏見與互相尊重的友善環境。"
+            },
+            {
+                id: 7,
+                question: "下列何者是消除對女性暴力的重要作為？",
+                options: ["宣導「受害人應自行負責」觀念", "建立健全的法律防護網與支持求助系統", "限制女性夜間出門的時間", "無視家庭內部的言語暴力"],
+                answer: 1,
+                explanation: "建立完善的法律、求助機制與安全社會網絡，是預防與消除性別暴力的基礎。"
+            },
+            {
+                id: 8,
+                question: "什麼是「性別盲 (Gender Blindness)」？",
+                options: ["一種視力障礙疾病", "無視不同性別在社會情境中所面臨的差異與需求不平等", "能夠完全平等對待所有人", "專門研究性別差異的學問"],
+                answer: 1,
+                explanation: "「性別盲」是指忽視性別因素如何影響人們取得資源與權利的機會，可能間接維持了不平等。"
+            },
+            {
+                id: 9,
+                question: "數位時代下的「性別數位落差」指的是什麼？",
+                options: ["男女打電玩遊戲的勝率差異", "不同性別在獲取、使用數位科技與網路機會上的不平等", "手機品牌的消費選擇差異", "電腦程式語言的喜好不同"],
+                answer: 1,
+                explanation: "確保所有性別平等享有科技、網路與數位技能培訓，是實現數位包容的重要目標。"
+            },
+            {
+                id: 10,
+                question: "落實 SDG 5 性別平權，需要誰的參與和努力？",
+                options: ["僅需要女性積極爭取", "僅需要政府制定政策", "社會上的每一個人（不分性別）共同參與", "僅需要國際非政府組織推動"],
+                answer: 2,
+                explanation: "性別平權需要所有性別共同翻轉刻板印象、參與推動，才能建立尊重與平等的社會。"
+            }
+        ];
+
+        // 茅草屋在村莊地圖中的相對座標 (百分比 %)
+        const hutPositions = [
+            { top: '10%', left: '12%' },
+            { top: '15%', left: '42%' },
+            { top: '22%', left: '72%' },
+            { top: '42%', left: '80%' },
+            { top: '48%', left: '50%' },
+            { top: '52%', left: '20%' },
+            { top: '75%', left: '10%' },
+            { top: '78%', left: '38%' },
+            { top: '72%', left: '68%' },
+            { top: '42%', left: '32%' }
+        ];
+
+        // 遊戲狀態變數
+        let answeredHuts = new Set();
+        let correctCount = 0;
+        let currentHutIndex = null;
+
+        // 初始化村莊茅草屋
+        function initVillage() {
+            const container = document.getElementById('huts-container');
+            container.innerHTML = '';
+
+            hutPositions.forEach((pos, index) => {
+                const hut = document.createElement('div');
+                hut.className = `hut-card absolute flex flex-col items-center justify-center`;
+                hut.style.top = pos.top;
+                hut.style.left = pos.left;
+                hut.id = `hut-${index}`;
+
+                hut.innerHTML = `
+                    <div class="relative group">
+                        <!-- 茅草屋 SVG 圖示 -->
+                        <svg class="w-16 h-16 md:w-20 md:h-20 drop-shadow-md transition transform group-hover:scale-105" viewBox="0 0 100 100">
+                            <!-- 屋頂 (茅草) -->
+                            <polygon points="50,10 10,48 90,48" fill="#d7ccc8" stroke="#8d6e63" stroke-width="4"/>
+                            <polygon points="50,10 20,45 80,45" fill="#a1887f"/>
+                            <path d="M 20 45 L 25 35 M 40 45 L 43 30 M 60 45 L 58 30 M 80 45 L 75 35" stroke="#6d4c41" stroke-width="2"/>
+                            <!-- 主體 (木造) -->
+                            <rect x="20" y="45" width="60" height="45" fill="#d7ccc8" stroke="#5d4037" stroke-width="4" rx="4"/>
+                            <!-- 門 -->
+                            <rect x="42" y="60" width="16" height="30" fill="#4e342e" rx="2"/>
+                            <!-- 窗戶 -->
+                            <rect x="26" y="55" width="12" height="12" fill="#ffe082" stroke="#5d4037" stroke-width="2"/>
+                            <rect x="62" y="55" width="12" height="12" fill="#ffe082" stroke="#5d4037" stroke-width="2"/>
+                        </svg>
+
+                        <!-- 屋頂門牌編號 -->
+                        <span id="badge-${index}" class="absolute -top-2 -right-2 bg-amber-600 text-white font-bold text-xs w-7 h-7 rounded-full flex items-center justify-center border-2 border-white shadow">
+                            ${index + 1}
+                        </span>
+
+                        <!-- 狀態浮動標籤 -->
+                        <span id="status-${index}" class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-[11px] font-bold px-2 py-0.5 rounded-full bg-white/90 text-amber-900 shadow whitespace-nowrap border border-amber-200">
+                            未探索
+                        </span>
+                    </div>
+                `;
+
+                hut.addEventListener('click', () => openQuizModal(index));
+                container.appendChild(hut);
+            });
+        }
+
+        // 開啟答題視窗
+        function openQuizModal(index) {
+            if (answeredHuts.has(index)) return; // 已答過不可重複點擊
+
+            currentHutIndex = index;
+            const q = questions[index];
+
+            document.getElementById('modal-hut-number').innerText = `茅草屋 #${index + 1}`;
+            document.getElementById('question-title').innerText = `${index + 1}. ${q.question}`;
+            
+            const optionsBox = document.getElementById('options-container');
+            optionsBox.innerHTML = '';
+
+            // 重置回饋區塊與按鈕
+            document.getElementById('feedback-box').classList.add('hidden');
+            document.getElementById('next-btn').classList.add('hidden');
+
+            // 產生選項按鈕
+            q.options.forEach((opt, optIdx) => {
+                const btn = document.createElement('button');
+                btn.className = `w-full text-left p-4 rounded-xl border-2 border-amber-200 bg-white hover:bg-amber-50 font-medium text-slate-700 transition flex items-center gap-3 option-btn`;
+                btn.innerHTML = `
+                    <span class="w-7 h-7 rounded-full bg-amber-100 text-amber-800 font-bold flex items-center justify-center text-sm border border-amber-300">${String.fromCharCode(65 + optIdx)}</span>
+                    <span class="flex-1">${opt}</span>
+                `;
+                btn.onclick = () => checkAnswer(optIdx);
+                optionsBox.appendChild(btn);
+            });
+
+            document.getElementById('quiz-modal').classList.remove('hidden');
+        }
+
+        // 檢查答案
+        function checkAnswer(selectedIndex) {
+            const q = questions[currentHutIndex];
+            const isCorrect = selectedIndex === q.answer;
+
+            // 禁用所有選項按鈕
+            const buttons = document.querySelectorAll('.option-btn');
+            buttons.forEach((btn, idx) => {
+                btn.disabled = true;
+                btn.classList.remove('hover:bg-amber-50');
+                if (idx === q.answer) {
+                    btn.classList.add('bg-emerald-100', 'border-emerald-500', 'text-emerald-900');
+                } else if (idx === selectedIndex && !isCorrect) {
+                    btn.classList.add('bg-rose-100', 'border-rose-400', 'text-rose-900');
+                }
+            });
+
+            // 顯示回饋訊息
+            const feedbackBox = document.getElementById('feedback-box');
+            const feedbackTitle = document.getElementById('feedback-title');
+            const feedbackExp = document.getElementById('feedback-explanation');
+
+            feedbackBox.classList.remove('hidden', 'bg-emerald-50', 'border-emerald-300', 'bg-rose-50', 'border-rose-300');
+
+            if (isCorrect) {
+                correctCount++;
+                feedbackBox.classList.add('bg-emerald-50', 'border-emerald-300');
+                feedbackTitle.className = 'font-bold mb-1 text-base flex items-center gap-2 text-emerald-800';
+                feedbackTitle.innerHTML = `<i class="fa-solid fa-circle-check text-xl"></i> 答對了！太棒了！`;
+            } else {
+                feedbackBox.classList.add('bg-rose-50', 'border-rose-300');
+                feedbackTitle.className = 'font-bold mb-1 text-base flex items-center gap-2 text-rose-800';
+                feedbackTitle.innerHTML = `<i class="fa-solid fa-circle-xmark text-xl"></i> 答錯囉！再接再厲！`;
+            }
+
+            feedbackExp.innerText = q.explanation;
+
+            // 更新計分與茅草屋狀態
+            answeredHuts.add(currentHutIndex);
+            updateScoreDisplay();
+            updateHutStatus(currentHutIndex, isCorrect);
+
+            // 顯示下一步按鈕
+            const nextBtn = document.getElementById('next-btn');
+            nextBtn.classList.remove('hidden');
+            if (answeredHuts.size === 10) {
+                nextBtn.innerHTML = `檢視最終結果 <i class="fa-solid fa-trophy ml-1"></i>`;
+                nextBtn.onclick = showSettlement;
+            } else {
+                nextBtn.innerHTML = `繼續探索 <i class="fa-solid fa-arrow-right ml-1"></i>`;
+                nextBtn.onclick = closeModal;
+            }
+        }
+
+        // 更新計分看板
+        function updateScoreDisplay() {
+            document.getElementById('score-text').innerText = `${correctCount} / 10`;
+        }
+
+        // 更新地圖茅草屋標籤與圖示
+        function updateHutStatus(index, isCorrect) {
+            const hut = document.getElementById(`hut-${index}`);
+            const badge = document.getElementById(`badge-${index}`);
+            const status = document.getElementById(`status-${index}`);
+
+            hut.classList.add('completed');
+            if (isCorrect) {
+                badge.className = "absolute -top-2 -right-2 bg-emerald-600 text-white font-bold text-xs w-7 h-7 rounded-full flex items-center justify-center border-2 border-white shadow";
+                badge.innerHTML = `<i class="fa-solid fa-check"></i>`;
+                status.className = "absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 shadow whitespace-nowrap border border-emerald-300";
+                status.innerText = "已解答 (正確)";
+            } else {
+                badge.className = "absolute -top-2 -right-2 bg-rose-600 text-white font-bold text-xs w-7 h-7 rounded-full flex items-center justify-center border-2 border-white shadow";
+                badge.innerHTML = `<i class="fa-solid fa-xmark"></i>`;
+                status.className = "absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-[11px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 shadow whitespace-nowrap border border-rose-300";
+                status.innerText = "已解答 (錯誤)";
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('quiz-modal').classList.add('hidden');
+        }
+
+        // 顯示關卡結算 Modal
+        function showSettlement() {
+            closeModal();
+            const resultModal = document.getElementById('result-modal');
+            const iconContainer = document.getElementById('result-icon-container');
+            const title = document.getElementById('result-title');
+            const message = document.getElementById('result-message');
+            const finalScore = document.getElementById('final-score');
+            const actions = document.getElementById('result-actions');
+
+            finalScore.innerText = `${correctCount} / 10 題`;
+
+            if (correctCount >= 8) {
+                // 通關成功 (>= 8 題)
+                iconContainer.className = "w-24 h-24 mx-auto mb-4 rounded-full flex items-center justify-center text-5xl bg-emerald-100 text-emerald-600 shadow-inner";
+                iconContainer.innerHTML = `<i class="fa-solid fa-award"></i>`;
+                title.innerText = "恭喜成功通關！";
+                message.innerText = `太棒了！您順利在村莊中展現了豐富的 SDGs 性別平權知識！可以前往下一關繼續挑戰囉！`;
+                
+                actions.innerHTML = `
+                    <button onclick="window.location.href='level2.html'" class="w-full py-3 px-6 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold rounded-2xl shadow-lg transition transform active:scale-95 flex items-center justify-center gap-2">
+                        前往下一關 <i class="fa-solid fa-circle-arrow-right"></i>
+                    </button>
+                `;
+            } else {
+                // 挑戰未通過 (< 8 題)
+                iconContainer.className = "w-24 h-24 mx-auto mb-4 rounded-full flex items-center justify-center text-5xl bg-rose-100 text-rose-600 shadow-inner";
+                iconContainer.innerHTML = `<i class="fa-solid fa-rotate-left"></i>`;
+                title.innerText = "挑戰未通過！";
+                message.innerText = `答對 ${correctCount} 題，需要達到 8 題以上才能通關喔！再重新挑戰一次吧！`;
+
+                actions.innerHTML = `
+                    <button onclick="window.location.reload()" class="w-full py-3 px-6 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-bold rounded-2xl shadow-lg transition transform active:scale-95 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-rotate-right"></i> 重新挑戰
+                    </button>
+                `;
+            }
+
+            resultModal.classList.remove('hidden');
+        }
+
+        // 初始化遊戲
+        window.onload = function() {
+            initVillage();
+        };
+    </script>
+</body>
+</html>

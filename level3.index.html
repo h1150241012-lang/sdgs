@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SDGs 性別平權小達人 - 學習證書</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Noto Serif TC & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Noto+Serif+TC:wght@400;600;700;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Serif TC', serif;
+        }
+        
+        .font-serif-tc {
+            font-family: 'Noto Serif TC', serif;
+        }
+
+        .font-signature {
+            font-family: 'Alex Brush', cursive;
+        }
+
+        /* SDGs Goal 5 Color: Red/Pink Gradient (#FF3A21 to #E5243B) */
+        .sdg5-bg {
+            background: linear-gradient(135deg, #FF3A21 0%, #E5243B 100%);
+        }
+
+        .sdg5-text {
+            color: #E5243B;
+        }
+
+        /* 金色精緻邊框與漸層 */
+        .gold-border {
+            border: 12px double #D4AF37;
+        }
+
+        .gold-gradient-text {
+            background: linear-gradient(135deg, #B8860B 0%, #D4AF37 50%, #AA771C 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .certificate-watermark {
+            background-image: radial-gradient(circle, rgba(229, 36, 59, 0.03) 0%, transparent 70%);
+        }
+
+        /* @media print 優化：列印與存為 PDF 時的樣式設定 */
+        @media print {
+            /* 隱藏非證書內容 */
+            .no-print {
+                display: none !important;
+            }
+
+            /* 頁面邊距與 A4 橫向設定 */
+            @page {
+                size: A4 landscape;
+                margin: 0;
+            }
+
+            body {
+                background: #ffffff !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            .certificate-container {
+                box-shadow: none !important;
+                border-radius: 0 !important;
+                width: 100vw !important;
+                height: 100vh !important;
+                max-width: none !important;
+                margin: 0 !important;
+                padding: 2.5rem !important;
+                page-break-after: always;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen py-8 px-4 flex flex-col items-center justify-center">
+
+    <!-- 控制面板區 (列印時隱藏) -->
+    <div class="no-print w-full max-w-4xl bg-white rounded-2xl shadow-md p-6 mb-8 border border-slate-200">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div class="flex-1 w-full">
+                <label for="studentNameInput" class="block text-sm font-semibold text-slate-700 mb-2">
+                    <i class="fa-solid fa-user-pen text-rose-500 mr-2"></i>請輸入獲獎學員姓名：
+                </label>
+                <div class="relative">
+                    <input 
+                        type="text" 
+                        id="studentNameInput" 
+                        placeholder="例如：王小明" 
+                        value="王小明" 
+                        class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-rose-500 text-lg transition outline-none pl-10"
+                        oninput="updateCertificateName(this.value)"
+                    />
+                    <i class="fa-solid fa-graduation-cap absolute left-3 top-4 text-slate-400"></i>
+                </div>
+                <p class="text-xs text-slate-500 mt-2">
+                    💡 提示：輸入姓名後，下方證書內容將即時更新。點擊下方按鈕即可下載/列印 PDF 證書。
+                </p>
+            </div>
+            
+            <div class="flex items-center gap-3 w-full md:w-auto">
+                <button 
+                    onclick="window.print()" 
+                    class="w-full md:w-auto bg-gradient-to-r from-rose-500 to-red-600 hover:from-rose-600 hover:to-red-700 text-white font-bold px-8 py-3.5 rounded-xl shadow-lg hover:shadow-xl transition transform active:scale-95 flex items-center justify-center gap-2 text-lg">
+                    <i class="fa-solid fa-print"></i>
+                    <span>下載 / 列印證書</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 證書本體區塊 (297mm x 210mm A4比例) -->
+    <div class="certificate-container relative w-full max-w-[1000px] aspect-[1.414/1] bg-white rounded-xl shadow-2xl p-8 sm:p-12 border-8 border-rose-600 flex flex-col justify-between overflow-hidden certificate-watermark">
+        
+        <!-- 背景裝飾角落圖案 -->
+        <div class="absolute top-0 left-0 w-32 h-32 border-t-8 border-l-8 border-amber-400 pointer-events-none"></div>
+        <div class="absolute top-0 right-0 w-32 h-32 border-t-8 border-r-8 border-amber-400 pointer-events-none"></div>
+        <div class="absolute bottom-0 left-0 w-32 h-32 border-b-8 border-l-8 border-amber-400 pointer-events-none"></div>
+        <div class="absolute bottom-0 right-0 w-32 h-32 border-b-8 border-r-8 border-amber-400 pointer-events-none"></div>
+
+        <!-- 內層雙細邊框 -->
+        <div class="absolute inset-4 border-2 border-rose-200 pointer-events-none rounded-lg"></div>
+        <div class="absolute inset-5 border border-amber-300 pointer-events-none rounded-lg"></div>
+
+        <!-- 證書頁眉 Header -->
+        <div class="relative z-10 flex justify-between items-start">
+            <!-- SDGs Logo / 圖示標籤 -->
+            <div class="flex items-center gap-3">
+                <div class="w-14 h-14 sm:w-16 sm:h-16 sdg5-bg rounded-xl flex items-center justify-center shadow-md text-white font-black text-xl sm:text-2xl">
+                    SDG 5
+                </div>
+                <div>
+                    <span class="text-xs sm:text-sm font-bold tracking-wider text-slate-500 uppercase block">UN Sustainable Development Goals</span>
+                    <span class="text-sm sm:text-base font-bold text-rose-600 flex items-center gap-1.5">
+                        <i class="fa-solid fa-venus-mars"></i> 性別平等 Gender Equality
+                    </span>
+                </div>
+            </div>
+
+            <!-- 證書編號 -->
+            <div class="text-right text-xs sm:text-sm text-slate-400 font-mono">
+                <p>證書編號：SDG5-2026-<span id="certId">8892</span></p>
+                <p>發證日期：<span id="certDate">2026-10-03</span></p>
+            </div>
+        </div>
+
+        <!-- 證書核心內容 Content -->
+        <div class="relative z-10 text-center my-auto py-4">
+            <!-- 主標題 -->
+            <h1 class="text-3xl sm:text-5xl font-black font-serif-tc tracking-widest text-slate-800 mb-2">
+                結 業 證 書
+            </h1>
+            <p class="text-xs sm:text-sm tracking-widest text-amber-600 uppercase font-semibold mb-6">
+                Certificate of Completion
+            </p>
+
+            <!-- 授與說明與學員姓名 -->
+            <p class="text-base sm:text-lg text-slate-600 mb-3">茲證明學員</p>
+            
+            <div class="inline-block relative px-8 py-2 border-b-2 border-slate-800 mb-4 min-w-[220px]">
+                <span id="displayName" class="text-2xl sm:text-4xl font-bold font-serif-tc text-slate-900 tracking-wider">
+                    王小明
+                </span>
+            </div>
+
+            <p class="text-sm sm:text-base text-slate-700 max-w-2xl mx-auto leading-relaxed mb-6">
+                完成「聯合國永續發展目標（SDGs）性別平等與平權專題學習課程」，表現優異，特頒此證，並授予稱號：
+            </p>
+
+            <!-- 榮譽稱號框 -->
+            <div class="inline-flex items-center justify-center px-6 py-3 rounded-2xl bg-gradient-to-r from-amber-500/10 via-rose-500/10 to-amber-500/10 border-2 border-amber-400/60 shadow-sm mb-2">
+                <i class="fa-solid fa-crown text-amber-500 text-xl sm:text-2xl mr-3"></i>
+                <span class="text-xl sm:text-3xl font-black font-serif-tc gold-gradient-text tracking-widest">
+                    SDGs 性別平權小達人
+                </span>
+                <i class="fa-solid fa-crown text-amber-500 text-xl sm:text-2xl ml-3"></i>
+            </div>
+        </div>
+
+        <!-- 證書頁腳 Footer (簽名與金色標章) -->
+        <div class="relative z-10 flex justify-between items-end pt-4 border-t border-slate-200/60">
+            <!-- 簽名處 1 -->
+            <div class="text-center">
+                <div class="font-signature text-2xl sm:text-3xl text-slate-700 h-8 flex items-end justify-center">
+                    Elena Rostova
+                </div>
+                <div class="w-32 sm:w-40 border-b border-slate-400 my-1 mx-auto"></div>
+                <p class="text-xs text-slate-500 font-semibold">SDGs 性別平等推動小組組長</p>
+            </div>
+
+            <!-- 金色質感金色榮譽標章 -->
+            <div class="relative flex flex-col items-center justify-center">
+                <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br from-amber-300 via-amber-400 to-amber-600 p-1 shadow-lg flex items-center justify-center">
+                    <div class="w-full h-full rounded-full border-2 border-dashed border-amber-100 flex flex-col items-center justify-center text-center p-1 bg-amber-500/20 text-white">
+                        <i class="fa-solid fa-award text-2xl sm:text-3xl text-amber-100 mb-0.5"></i>
+                        <span class="text-[9px] font-bold tracking-widest uppercase">Official Seal</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 簽名處 2 -->
+            <div class="text-center">
+                <div class="font-signature text-2xl sm:text-3xl text-slate-700 h-8 flex items-end justify-center">
+                    Lin S.H.
+                </div>
+                <div class="w-32 sm:w-40 border-b border-slate-400 my-1 mx-auto"></div>
+                <p class="text-xs text-slate-500 font-semibold">學習課程評審委員會 主席</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 動態邏輯指令碼 -->
+    <script>
+        // 即時同步更新姓名
+        function updateCertificateName(name) {
+            const displayName = document.getElementById('displayName');
+            if (name.trim() === '') {
+                displayName.innerText = '（學員姓名）';
+            } else {
+                displayName.innerText = name;
+            }
+        }
+
+        // 自動初始化日期與隨機編號
+        window.addEventListener('DOMContentLoaded', () => {
+            // 設定今日日期
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            document.getElementById('certDate').innerText = `${yyyy}-${mm}-${dd}`;
+
+            // 生成 random 證書號碼
+            const randomId = Math.floor(1000 + Math.random() * 9000);
+            document.getElementById('certId').innerText = randomId;
+        });
+    </script>
+</body>
+</html>
